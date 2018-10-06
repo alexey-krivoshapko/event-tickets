@@ -111,8 +111,10 @@ class Tribe__Tickets__Main {
 
 		$this->maybe_set_common_lib_info();
 
-		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ), 0 );
+		//add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ), 0 );
 		register_activation_hook( EVENT_TICKETS_MAIN_PLUGIN_FILE, array( $this, 'on_activation' ) );
+
+		add_action( 'tribe_common_loaded', array( $this, 'tribe_common_textdomain' ), 0 );
 	}
 
 	/**
@@ -123,6 +125,16 @@ class Tribe__Tickets__Main {
 		if ( ! is_network_admin() && ! isset( $_GET['activate-multi'] ) ) {
 			set_transient( '_tribe_tickets_activation_redirect', 1, 30 );
 		}
+	}
+
+	public function tribe_common_textdomain() {
+
+		/**
+		 * We need Common to be able to load text domains correctly.
+		 * With that in mind we initialize Common passing the plugin Main class as the context
+		 */
+		Tribe__Main::instance( $this )->load_text_domain( 'event-tickets', $this->plugin_dir . 'lang/' );
+
 	}
 
 	/**
@@ -147,12 +159,6 @@ class Tribe__Tickets__Main {
 		if ( version_compare( Tribe__Main::VERSION, self::MIN_COMMON_VERSION, '<' ) ) {
 			return;
 		}
-
-		/**
-		 * We need Common to be able to load text domains correctly.
-		 * With that in mind we initialize Common passing the plugin Main class as the context
-		 */
-		Tribe__Main::instance( $this )->load_text_domain( 'event-tickets', $this->plugin_dir . 'lang/' );
 
 		if (
 			class_exists( 'TribeEvents', false )
